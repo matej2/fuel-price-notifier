@@ -14,6 +14,9 @@ public class FuelPriceNotifierConfig {
         if (targetUrl == null) {
             throw new RuntimeException("Config 'application.scrape.url' is missing");
         }
-        return Jsoup.connect(targetUrl);
+        return Jsoup
+                .connect(targetUrl)
+                .userAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36")
+                .header("Accept-Language", "*") ;
     }
 }
