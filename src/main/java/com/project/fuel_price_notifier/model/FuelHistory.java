@@ -1,4 +1,4 @@
-package com.project.fuel_price_notifier.models;
+package com.project.fuel_price_notifier.model;
 
 import lombok.Getter;
 

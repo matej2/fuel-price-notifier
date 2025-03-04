@@ -1,8 +1,6 @@
-package com.project.fuel_price_notifier.models;
+package com.project.fuel_price_notifier.model;
 
 import org.junit.jupiter.api.Test;
-
-import java.util.Date;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
