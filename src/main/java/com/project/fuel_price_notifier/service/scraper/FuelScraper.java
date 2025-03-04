@@ -1,7 +1,7 @@
 package com.project.fuel_price_notifier.service.scraper;
 
-import com.project.fuel_price_notifier.models.FuelHistory;
-import com.project.fuel_price_notifier.models.FuelMetadata;
+import com.project.fuel_price_notifier.model.FuelHistory;
+import com.project.fuel_price_notifier.model.FuelMetadata;
 import com.project.fuel_price_notifier.util.FormattingUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.jsoup.Connection;

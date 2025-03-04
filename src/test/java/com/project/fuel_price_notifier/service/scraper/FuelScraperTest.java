@@ -1,6 +1,6 @@
 package com.project.fuel_price_notifier.service.scraper;
 
-import com.project.fuel_price_notifier.models.FuelHistory;
+import com.project.fuel_price_notifier.model.FuelHistory;
 import org.jsoup.Connection;
 import org.jsoup.nodes.Document;
 import org.junit.jupiter.api.Test;
