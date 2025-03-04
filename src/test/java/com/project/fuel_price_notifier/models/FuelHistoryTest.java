@@ -9,9 +9,10 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class FuelHistoryTest {
     private FuelMetadata getFuelMetadata() {
         return new FuelMetadata(
-                new FuelEntry(new Date(), 1.0F),
-                new FuelEntry(new Date(), 2.0F),
-                new FuelEntry(new Date(), 3.0F)
+                "date",
+                1F,
+                2F,
+                3F
         );
     }
 
