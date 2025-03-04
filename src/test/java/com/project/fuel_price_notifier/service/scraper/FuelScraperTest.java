@@ -1,13 +1,14 @@
 package com.project.fuel_price_notifier.service.scraper;
 
+import com.project.fuel_price_notifier.models.FuelHistory;
 import org.jsoup.Connection;
 import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.core.env.Environment;
+import org.springframework.mock.env.MockEnvironment;
 
 
 import java.io.IOException;
@@ -18,103 +19,118 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class FuelScraperTest {
 
-    @Mock
+    @Spy
     Connection jsoupConnection;
-    @Mock
-    Environment environment;
-    @Mock
-    Document document;
-    @Mock
-    Element body;
 
-    private String getSampleHtml() {
-        return """
+    private Document getTestDocument() {
+        String html = """
                 <!DOCTYPE html>
-                <html>
+                <html class="type-ArticlePage" lang="sl" dir="ltr">
                 
-                <body>
+                <body class="ArticlePage">
+                
+                \s
+                
+                <div class="legislation-element__table table-module block " id="e162094">
+                	<div class="adapt">
+                		<div class="inner">
                 
                 
-                <table class="table stripes at-table">
                 
                 
                 
                 
-                        <thead>
-    
-                            <tr>
-    
-                                    <th scope="col" class="align-general bgcolor">Datum veljavnosti </th>
-    
-                                    <th scope="col" class="align-general bgcolor">Drobnoprodajna cena NMB 95 (evro/liter)</th>
-    
-                                    <th scope="col" class="align-general bgcolor">Drobnoprodajna cena dizelskega goriva (evro/liter)</th>
-    
-                            </tr>
-    
-                        </thead>
-    
-                    <tbody>
-    
-    
-    
-    
-    
-                            <tr>
-    
-                                        <td class="align-general bold">od 25. 2. do 10. 3. 2025</td>
-    
-                                        <td class="align-general bold">1,538</td>
-    
-                                        <td class="align-general bold">1,598</td>
-    
-                            </tr>
-    
-    
-    
-                            <tr>
-    
-                                        <td class="align-general">od 11. 2. do 24. 2. 2025</td>
-    
-                                        <td class="align-general">1,535</td>
-    
-                                        <td class="align-general">1,586</td>
-    
-                            </tr>
-    
-    
-    
-                            <tr>
-    
-                                        <td class="align-general">od 28. 1. do 10. 2. 2025</td>
-    
-                                        <td class="align-general">1,550</td>
-    
-                                        <td class="align-general">1,619</td>
-    
-                            </tr>
-                    </tbody>
-                </table>
-                </body>
-                </html>
+                
+                
+                					<div class="at-container at-responsive-table"><div class="at-wrapper"><div class="at-scrollable-table"><table class="table stripes at-table">
+                
+                
+                
+                
+                							<thead>
+                
+                								<tr>
+                
+                										<th scope="col" class="align-general bgcolor">Datum veljavnosti </th>
+                
+                										<th scope="col" class="align-general bgcolor">Drobnoprodajna cena NMB 95 (evro/liter)</th>
+                
+                										<th scope="col" class="align-general bgcolor">Drobnoprodajna cena dizelskega goriva (evro/liter)</th>
+                
+                								</tr>
+                
+                							</thead>
+                
+                						<tbody>
+                
+                
+                
+                
+                
+                								<tr>
+                
+                											<td class="align-general bold">od 25. 2. do 10. 3. 2025</td>
+                
+                											<td class="align-general bold">1,538</td>
+                
+                											<td class="align-general bold">1,598</td>
+                
+                								</tr>
+                
+                
+                
+                								<tr>
+                
+                											<td class="align-general">od 11. 2. do 24. 2. 2025</td>
+                
+                											<td class="align-general">1,535</td>
+                
+                											<td class="align-general">1,586</td>
+                
+                								</tr>
+                
+                
+                
+                								<tr>
+                
+                											<td class="align-general">od 28. 1. do 10. 2. 2025</td>
+                
+                											<td class="align-general">1,550</td>
+                
+                											<td class="align-general">1,619</td>
+                
+                								</tr>
+                
+                
+                
+                
+                						</tbody>
+                					</table></div></div></div></div></div></div>
+                
+                </body></html>
                 """;
+        Document result = Document.createShell("");
+        result.append(html);
+        return result;
     }
 
-    private void mockEnvironmentConfig() {
-        when(environment.getProperty("application.scrape.selector.table")).thenReturn(".w3-example");
-        when(environment.getProperty("application.scrape.selector.row")).thenReturn("tr");
-        when(environment.getProperty("application.scrape.selector.column")).thenReturn("td.align-general");
+    public Environment getEnvironment() {
+        MockEnvironment mockEnv = new MockEnvironment();
+        mockEnv.setProperty("application.scrape.selector.table",".legislation-element__table table");
+        mockEnv.setProperty("application.scrape.selector.row", "tr");
+        mockEnv.setProperty("application.scrape.selector.column", "td.align-general");
+        return mockEnv;
     }
 
     @Test
-    void getFuelPriceForDay() throws IOException {
-        when(body.text()).thenReturn(getSampleHtml());
-        when(document.body()).thenReturn(body);
-        when(jsoupConnection.get()).thenReturn(document);
-        mockEnvironmentConfig();
+    void getFuelPriceList() throws IOException {
+        when(jsoupConnection.get()).thenReturn(getTestDocument());
 
-        FuelScraper scraper = new FuelScraper(jsoupConnection, environment);
+        FuelScraper scraper = new FuelScraper(jsoupConnection, getEnvironment());
 
-        assertNull(scraper.getFuelPriceForDay());
+        FuelHistory response = scraper.getFuelPriceList();
+
+        assertEquals(1.538F, response.getPriceHistory().getFirst().gasoline());
+        assertEquals(1.598F, response.getPriceHistory().getFirst().diesel());
     }
 }

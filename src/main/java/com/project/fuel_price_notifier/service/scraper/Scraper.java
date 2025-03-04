@@ -5,5 +5,5 @@ import com.project.fuel_price_notifier.models.FuelHistory;
 import java.io.IOException;
 
 public interface Scraper {
-    FuelHistory getFuelPriceForDay() throws IOException;
+    FuelHistory getFuelPriceList() throws IOException;
 }

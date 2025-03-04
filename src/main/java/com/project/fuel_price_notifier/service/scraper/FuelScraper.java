@@ -2,23 +2,26 @@ package com.project.fuel_price_notifier.service.scraper;
 
 import com.project.fuel_price_notifier.models.FuelHistory;
 import com.project.fuel_price_notifier.models.FuelMetadata;
+import com.project.fuel_price_notifier.util.FormattingUtil;
+import lombok.extern.slf4j.Slf4j;
 import org.jsoup.Connection;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
+import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.text.ParseException;
 
+@Service
+@Slf4j
 public class FuelScraper implements Scraper {
     private final String tableSelector;
     private final String rowSelector;
     private final String columnSelector;
-    Connection jsoupConnection;
-    Logger logger = LoggerFactory.getLogger(FuelScraper.class);
+    private final Connection jsoupConnection;
 
     @Autowired
     FuelScraper(Connection jsoupConnection, Environment environment) {
@@ -38,11 +41,17 @@ public class FuelScraper implements Scraper {
             throw new RuntimeException("Invalid column format");
         }
 
-        String date = columnList.get(0).text();
+        String date = columnList.getFirst().text();
+        Float gasolinePrice = -1.0F;
+        Float dieselPrice = -1.0F;
+        Float lpgPrice = -1.0F;
 
-        Float gasolinePrice = Float.parseFloat(columnList.get(1).text());
-        Float dieselPrice = Float.parseFloat(columnList.get(1).text());
-        Float lpgPrice = Float.parseFloat(columnList.get(1).text());
+        try {
+            gasolinePrice = FormattingUtil.parseLocalFloat(columnList.get(1).text());
+            dieselPrice = FormattingUtil.parseLocalFloat(columnList.get(2).text());
+        } catch (ParseException e) {
+            log.warn("Cannot parse details for date {}", date);
+        }
 
         return new FuelMetadata(date, gasolinePrice, dieselPrice, lpgPrice);
     }
@@ -55,6 +64,9 @@ public class FuelScraper implements Scraper {
             throw new RuntimeException("No row found");
         }
 
+        // Remove table header
+        rowList.removeFirst();
+
         for (Element columnElement : rowList) {
             fuelHistory.addRow(mapFuelHistoryColumn(columnElement));
         }
@@ -64,9 +76,10 @@ public class FuelScraper implements Scraper {
 
 
     @Override
-    public FuelHistory getFuelPriceForDay() throws IOException {
+    public FuelHistory getFuelPriceList() throws IOException {
         Document response = this.jsoupConnection.get();
         Element table = response.selectFirst(tableSelector);
+        assert table != null;
         return mapFuelHistoryRow(table);
     }
 }
