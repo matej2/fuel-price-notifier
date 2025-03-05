@@ -7,7 +7,8 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class TwillioClient {
-    private static final String RECEIVER_PHONE_NUM = System.getenv("RECEIVER_PHONE_NUM");
+    private static final String SENDER_PHONE_NUM = System.getenv("TWILIO_SENDER_PHONE_NUM");
+    private static final String RECEIVER_PHONE_NUM = System.getenv("TWILIO_RECEIVER_PHONE_NUM");
 
     private static final String TWILIO_ACCOUNT_SID = System.getenv("TWILIO_ACCOUNT_SID");
     private static final String TWILIO_AUTH_TOKEN = System.getenv("TWILIO_AUTH_TOKEN");
@@ -17,11 +18,11 @@ public class TwillioClient {
     }
 
     public void sendMessage(String body) {
-        Message message = Message
+        Message
                 .creator(
-                        new PhoneNumber("+18777804236"),
-                        new PhoneNumber("+19123616064"),
-                        "This is the ship that made the Kessel Run in fourteen parsecs?"
+                        new PhoneNumber(RECEIVER_PHONE_NUM),
+                        new PhoneNumber(SENDER_PHONE_NUM),
+                        body
                 )
                 .create();
     }
