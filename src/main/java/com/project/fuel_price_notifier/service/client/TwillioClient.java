@@ -1,5 +1,6 @@
 package com.project.fuel_price_notifier.service.client;
 
+import com.project.fuel_price_notifier.model.SmsPayload;
 import com.twilio.Twilio;
 import com.twilio.rest.api.v2010.account.Message;
 import com.twilio.type.PhoneNumber;
@@ -17,12 +18,12 @@ public class TwillioClient {
         Twilio.init(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN);
     }
 
-    public void sendMessage(String body) {
+    public void sendMessage(SmsPayload body) {
         Message
                 .creator(
                         new PhoneNumber(RECEIVER_PHONE_NUM),
                         new PhoneNumber(SENDER_PHONE_NUM),
-                        body
+                        body.toString()
                 )
                 .create();
     }

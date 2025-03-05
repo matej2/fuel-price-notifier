@@ -67,8 +67,8 @@ public class FuelScraper implements Scraper {
         // Remove table header
         rowList.removeFirst();
 
-        for (Element columnElement : rowList) {
-            fuelHistory.addRow(mapFuelHistoryColumn(columnElement));
+        for (Element row : rowList) {
+            fuelHistory.addRow(mapFuelHistoryColumn(row));
         }
         return fuelHistory;
     }
