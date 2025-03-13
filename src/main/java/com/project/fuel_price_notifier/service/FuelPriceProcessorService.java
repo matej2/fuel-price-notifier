@@ -2,19 +2,25 @@ package com.project.fuel_price_notifier.service;
 
 import com.project.fuel_price_notifier.model.FuelHistory;
 import com.project.fuel_price_notifier.model.FuelMetadata;
+import com.project.fuel_price_notifier.model.LatestFuelMetadataEntry;
 import com.project.fuel_price_notifier.model.SmsPayload;
+import com.project.fuel_price_notifier.repository.FuelMetadataRepository;
 import com.project.fuel_price_notifier.service.client.TwillioClient;
 import com.project.fuel_price_notifier.service.scraper.FuelScraper;
+import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 
+@Service
 public class FuelPriceProcessorService {
     private final FuelScraper scraper;
     private final TwillioClient twillioClient;
+    private final FuelMetadataRepository fuelMetadataRepository;
 
-    FuelPriceProcessorService(FuelScraper scraper, TwillioClient twillioClient) {
+    FuelPriceProcessorService(FuelScraper scraper, TwillioClient twillioClient, FuelMetadataRepository fuelMetadataRepository) {
         this.scraper = scraper;
         this.twillioClient = twillioClient;
+        this.fuelMetadataRepository = fuelMetadataRepository;
     }
 
     private SmsPayload fillPayloadDataForLatestPriceData(FuelHistory history) {
@@ -41,7 +47,18 @@ public class FuelPriceProcessorService {
         FuelHistory fuelHistory = scraper.getFuelPriceList();
 
         SmsPayload payload = fillPayloadDataForLatestPriceData(fuelHistory);
-        twillioClient.sendMessage(payload);
+
+        FuelMetadata fuelMetadata = fuelHistory.getPriceHistory().getFirst();
+        LatestFuelMetadataEntry latestFuelMetadataEntry = new LatestFuelMetadataEntry(
+                fuelMetadata.date(),
+                fuelMetadata.gasoline(),
+                fuelMetadata.diesel(),
+                fuelMetadata.lpg()
+        );
+
+        fuelMetadataRepository.save(latestFuelMetadataEntry);
+        //fuelMetadataRepository.findFirstByOrderByDateCreatedDesc();
+        //twillioClient.sendMessage(payload);
 
     }
 }
